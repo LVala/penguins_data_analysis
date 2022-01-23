@@ -20,18 +20,9 @@
 
 
 \begin{document}
-\SweaveOpts{concordance=TRUE}
+\input{Szablon-concordance}
 \maketitle
 
-<<packages, echo=FALSE>>==
-library(psych)
-library(ggplot2)
-library(magrittr)
-library(dplyr)
-library(ggpubr)
-library(reshape2)
-library(ggcorrplot)
-@
 
 \textit{Ja, ni¿ej podpisany w³asnorêcznym podpisem deklarujê, ¿e przygotowa³em przedstawiony do oceny projekt samodzielnie i ¿adna jego czêœæ nie jest kopi¹ pracy innej osoby.}
 \begin{flushright}
@@ -59,253 +50,246 @@ W sk³ad projektu wchodz¹ dwa zestawy danych: \textit{penguins\_raw} oraz jego up
 \end{itemize}
 
 Do za³adowania ich do œrodowiska R mo¿na podejœæ na dwa sposoby. Z racji tego, ¿e jest to zestaw danych przygotowanych z myœl¹ o edukacji, zosta³ spakowany do pakietu R, który mo¿na zainstalowaæ poprzez CRAN, a nastêpnie za³adowaæ:
-<<results=hide>>==
-install.packages("palmerpenguins", repos = "https://cloud.r-project.org/")
-library(palmerpenguins)
-data(package = 'palmerpenguins')
-penguins_data <- penguins
-@
+\begin{Schunk}
+\begin{Sinput}
+> install.packages("palmerpenguins", repos = "https://cloud.r-project.org/")
+> library(palmerpenguins)
+> data(package = 'palmerpenguins')
+> penguins_data <- penguins
+\end{Sinput}
+\end{Schunk}
 Alternatywnym podejœciem bêdzie pobranie pliku \textit{.csv} z \href{https://github.com/allisonhorst/palmerpenguins/tree/master/inst/extdata}{\texttt{repozytorium projektu}} i za³adowanie go:
-<<>>==
-penguins_data <- read.csv(file = "penguins.csv", header = TRUE, stringsAsFactors = TRUE)
-@
+\begin{Schunk}
+\begin{Sinput}
+> penguins_data <- read.csv(file = "penguins.csv", header = TRUE, stringsAsFactors = TRUE)
+\end{Sinput}
+\end{Schunk}
 Czyszczenie danych sprowadzi siê tylko do usuniêcia rekordów z wartoœciami nieznanymi, które s¹ numeryczne (s¹ tylko dwa takie wiersze i nie zawieraj¹ one ¿adnego z pomiarów, wiêc nie poskutkuje to du¿¹ utrat¹ informacji). W przypadku nieznanych zmiennych jakoœciowych (tylko p³ci pingwinów w tym przypadku), jedn¹ z metod by³oby zast¹pienie ich losowymi wartoœciami, jednak ze wzglêdu na potencjalnie du¿¹ korelacjê p³ci z pozosta³ymi cechami, nie jest to najlepsze rozwi¹zanie. Najlepsz¹ metod¹ by³oby zbadanie zale¿noœci cech i p³ci, i na tej podstawie uzupe³nienie danych, jednak, dla uproszczenia oraz ze wzglêdu na niewielk¹ iloœæ takich wierszy, tutaj zostan¹ usuniête. Inn¹ niewielk¹ zmian¹ bêdzie bêdzie konwersja typu roku obserwacji z liczby na zmienn¹ jakoœciow¹, w tym przypadku ma to wiêcej sensu, bo bardziej interesuj¹cymi informacjami s¹ cechy pingwinów w danym roku ni¿ œrednia lat wykonywania pomiarów:
-<<>>==
-penguins_data <- na.omit(penguins_data)
-penguins_data$year <- as.factor(penguins_data$year)
-@
+\begin{Schunk}
+\begin{Sinput}
+> penguins_data <- na.omit(penguins_data)
+> penguins_data$year <- as.factor(penguins_data$year)
+\end{Sinput}
+\end{Schunk}
 Wówczas dane wygl¹daæ bêd¹ nastêpuj¹co:
-<<>>==
-str(penguins_data)
-@
+\begin{Schunk}
+\begin{Sinput}
+> str(penguins_data)
+\end{Sinput}
+\begin{Soutput}
+'data.frame':	333 obs. of  8 variables:
+ $ species          : Factor w/ 3 levels "Adelie","Chinstrap",..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ island           : Factor w/ 3 levels "Biscoe","Dream",..: 3 3 3 3 3 3 3 3 3 3 ...
+ $ bill_length_mm   : num  39.1 39.5 40.3 36.7 39.3 38.9 39.2 41.1 38.6 34.6 ...
+ $ bill_depth_mm    : num  18.7 17.4 18 19.3 20.6 17.8 19.6 17.6 21.2 21.1 ...
+ $ flipper_length_mm: int  181 186 195 193 190 181 195 182 191 198 ...
+ $ body_mass_g      : int  3750 3800 3250 3450 3650 3625 4675 3200 3800 4400 ...
+ $ sex              : Factor w/ 2 levels "female","male": 2 1 1 1 2 1 2 1 2 2 ...
+ $ year             : Factor w/ 3 levels "2007","2008",..: 1 1 1 1 1 1 1 1 1 1 ...
+ - attr(*, "na.action")= 'omit' Named int [1:11] 4 9 10 11 12 48 179 219 257 269 ...
+  ..- attr(*, "names")= chr [1:11] "4" "9" "10" "11" ...
+\end{Soutput}
+\end{Schunk}
 
 
 \section{Analiza danych}
 \subsection{Wydobywanie podstawowych informacji z danych}
 Na pocz¹tku zostan¹ obliczone estymatory punktowe podstawowych wielkoœci statystyki opisowej:
-<<>>==
-summary(penguins_data)
-# zmienne jakoœciowe ignorowane
-describeBy(penguins_data[c(3:6)])
-@
+\begin{Schunk}
+\begin{Sinput}
+> summary(penguins_data)
+\end{Sinput}
+\begin{Soutput}
+      species          island    bill_length_mm  bill_depth_mm  
+ Adelie   :146   Biscoe   :163   Min.   :32.10   Min.   :13.10  
+ Chinstrap: 68   Dream    :123   1st Qu.:39.50   1st Qu.:15.60  
+ Gentoo   :119   Torgersen: 47   Median :44.50   Median :17.30  
+                                 Mean   :43.99   Mean   :17.16  
+                                 3rd Qu.:48.60   3rd Qu.:18.70  
+                                 Max.   :59.60   Max.   :21.50  
+ flipper_length_mm  body_mass_g       sex        year    
+ Min.   :172       Min.   :2700   female:165   2007:103  
+ 1st Qu.:190       1st Qu.:3550   male  :168   2008:113  
+ Median :197       Median :4050                2009:117  
+ Mean   :201       Mean   :4207                          
+ 3rd Qu.:213       3rd Qu.:4775                          
+ Max.   :231       Max.   :6300                          
+\end{Soutput}
+\begin{Sinput}
+> # zmienne jakoœciowe ignorowane
+> describeBy(penguins_data[c(3:6)])
+\end{Sinput}
+\begin{Soutput}
+                  vars   n    mean     sd median trimmed    mad    min    max
+bill_length_mm       1 333   43.99   5.47   44.5   43.98   6.97   32.1   59.6
+bill_depth_mm        2 333   17.16   1.97   17.3   17.19   2.22   13.1   21.5
+flipper_length_mm    3 333  200.97  14.02  197.0  200.36  16.31  172.0  231.0
+body_mass_g          4 333 4207.06 805.22 4050.0 4159.46 889.56 2700.0 6300.0
+                   range  skew kurtosis    se
+bill_length_mm      27.5  0.04    -0.90  0.30
+bill_depth_mm        8.4 -0.15    -0.91  0.11
+flipper_length_mm   59.0  0.36    -0.98  0.77
+body_mass_g       3600.0  0.47    -0.75 44.13
+\end{Soutput}
+\end{Schunk}
 
 Poni¿ej kilka wykresów przedstawiaj¹cych cechy numeryczne:
 
 \begin{figure}[H]
 \centering
-<<fig=TRUE, echo=FALSE>>==
-melted <- melt(penguins_data[c(3:6)])
-ggplot(melted, aes(x=variable, y=value, 
-                           fill=variable)) +
-  geom_boxplot(alpha=0.8) +
-  #geom_jitter(shape=16, position=position_jitter(0.3)) +
-  facet_wrap(~variable, scales="free", ncol=4, nrow=1) +
-  scale_fill_manual(values = c("#22577A","#38A3A5","#57CC99", "#80ED99"), 
-                    guide = "none") +
-  theme_minimal() +
-  theme(
-    legend.position="none",
-    text=element_text(family='mono', face="bold"),
-    title=element_text(size=15, family='mono', face="bold"),
-    axis.text.y=element_text(size=12, family='mono', face="bold"),
-    axis.text.x=element_blank(),
-    axis.title=element_blank(), 
-  )
-@
+\includegraphics{Szablon-007}
 \end{figure}
 
 Jak widaæ, dla wszystkich cech, z wyj¹tkiem \textit{bill\_depth\_mm}, \textit{skew}, czyli wspó³czynnik skoœnoœci przyjmuje wartoœci dodatnie, oznacza to, ¿e rozk³ady s¹ (w niewielkim stopniu, bo wartoœci \textit{skew} nadal bliskie zera) prawostronnie asymetryczne (maj¹ wyd³u¿one prawe ramiê rozk³adu). Rozk³ad \textit{bill\_depth\_mm} jest w podobnym stopniu lewostronnie asymetryczny. Na podstawie wartoœci kurtozy, która dla ka¿dej cechy jest ujemna, mo¿na stwierdziæ, ¿e intensywnoœæ wartoœci skrajnych jest mniejsza ni¿ w przypadku rozk³adu normalnego. Dobrze obrazuj¹ to poni¿sze wykresy gêstoœci prawdopodobieñstwa:
 
 \begin{figure}[H]
 \centering
-<<fig=TRUE, echo=FALSE>>==
-style <- theme_minimal() +
-  theme(
-    legend.position="none",
-    text=element_text(family='mono', face="bold"),
-    title=element_text(size=12, family='mono', face="bold"),
-    axis.text=element_text(size=12, family='mono', face="bold"),
-    axis.title.y=element_blank()
-  )
-
-fg1 <- ggplot(penguins_data, aes(x=bill_length_mm)) + geom_density(fill="#22577A", color="#e9ecef", alpha=0.8) + style
-fg2 <- ggplot(penguins_data, aes(x=bill_depth_mm)) + geom_density(fill="#38A3A5", color="#e9ecef", alpha=0.8) + style
-fg3 <- ggplot(penguins_data, aes(x=flipper_length_mm)) + geom_density(fill="#57CC99", color="#e9ecef", alpha=0.8) + style
-fg4 <- ggplot(penguins_data, aes(x=body_mass_g)) + geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8) + style
-
-ggarrange(fg1, fg2, fg3, fg4,
-          ncol=2, nrow=2, font.label=list(size = 12, family='mono'))
-@
+\includegraphics{Szablon-008}
 \end{figure}
 
 Badanie, czy dane pochodz¹ z jakiegoœ rozk³adu, zostanie przeprowadzone w dalszej czêœci dokumentu, ale ju¿ teraz, na podstawie wykresów gêstoœci i ich podobieñstwa do wykresu gêstoœci rozk³adu normalnego, mo¿na snuæ pewne przypuszczenia na ten temat.
 
 \subsection{Badanie zale¿noœci pomiêdzy danymi}
 Na pocz¹tku pod lupê zostan¹ wziête zmienne jakoœciowe i zale¿noœci pomiêdzy nimi.
-<<>>==
-# gatunek, a wyspa, na której zostal zaobserwowany
-penguins_data %>% count(species, island)
-@
+\begin{Schunk}
+\begin{Sinput}
+> # gatunek, a wyspa, na której zostal zaobserwowany
+> penguins_data %>% count(species, island)
+\end{Sinput}
+\begin{Soutput}
+    species    island   n
+1    Adelie    Biscoe  44
+2    Adelie     Dream  55
+3    Adelie Torgersen  47
+4 Chinstrap     Dream  68
+5    Gentoo    Biscoe 119
+\end{Soutput}
+\end{Schunk}
 \begin{figure}[H]
 \centering
-<<fig=True, echo=FALSE, height=4>>==
-# ze wzglêdu na dlugoœæ, przy kolejnych wykresach
-# kod je generuj¹cy zostanie ukryty
-ggplot(penguins_data, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("#22577A","#38A3A5","#57CC99"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip() +
-  theme(text=element_text(family='mono', face="bold"),
-        title=element_text(family='mono', face="bold"),
-        axis.text=element_text(size=15, family='mono', face="bold"), 
-        axis.title=element_text(size=18, family='mono', face="bold"))
-@
+\includegraphics{Szablon-010}
 \end{figure}
-<<>>==
-# gatunek, a pleæ
-penguins_data %>% count(sex, species)
-@
+\begin{Schunk}
+\begin{Sinput}
+> # gatunek, a pleæ
+> penguins_data %>% count(sex, species)
+\end{Sinput}
+\begin{Soutput}
+     sex   species  n
+1 female    Adelie 73
+2 female Chinstrap 34
+3 female    Gentoo 58
+4   male    Adelie 73
+5   male Chinstrap 34
+6   male    Gentoo 61
+\end{Soutput}
+\end{Schunk}
 \begin{figure}[H]
 \centering
-<<fig=True, echo=FALSE, height=4>>==
-ggplot(penguins_data, aes(x = sex, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("#22577A","#38A3A5","#57CC99"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip() +
-  theme(text=element_text(family='mono', face="bold"),
-        title=element_text(family='mono', face="bold"),
-        axis.text=element_text(size=15, family='mono', face="bold"), 
-        axis.title=element_text(size=18, family='mono', face="bold"))
-@
+\includegraphics{Szablon-012}
 \end{figure}
-<<>>==
-# wyspa, na której dokonano pomiaru, a pleæ
-penguins_data %>% count(sex, island)
-@
+\begin{Schunk}
+\begin{Sinput}
+> # wyspa, na której dokonano pomiaru, a pleæ
+> penguins_data %>% count(sex, island)
+\end{Sinput}
+\begin{Soutput}
+     sex    island  n
+1 female    Biscoe 80
+2 female     Dream 61
+3 female Torgersen 24
+4   male    Biscoe 83
+5   male     Dream 62
+6   male Torgersen 23
+\end{Soutput}
+\end{Schunk}
 \begin{figure}[H]
 \centering
-<<fig=True, echo=FALSE, height=4>>==
-ggplot(penguins_data, aes(x = sex, fill = island)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("#22577A","#38A3A5","#57CC99"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~island, ncol = 1) +
-  coord_flip() +
-  theme(text=element_text(family='mono', face="bold"),
-        title=element_text(family='mono', face="bold"),
-        axis.text=element_text(size=15, family='mono', face="bold"), 
-        axis.title=element_text(size=18, family='mono', face="bold"))
-@
+\includegraphics{Szablon-014}
 \end{figure}
 
 Ciekaw¹ cech¹, któr¹ mo¿na tutaj zauwa¿yæ, jest to, ¿e tylko gatunek \textit{Adelie} ¿yje wszystkie na wszystkich trzech wyspach, reszta gatunków zamieszkuje jedn¹ wyspê. Rozk³ad p³ci wzglêdem gatunku oraz wyspy wystêpowanie jest praktycznie równomierny, trudno zaobserwowaæ inne zale¿noœci pomiêdzy cechami jakoœciowymi.
 
 Teraz zale¿noœci pomiêdzy cechami numerycznymi i jakoœciowymi. Dla uproszczenia pod uwagê wziête zostan¹ tylko œrednie wartoœci grupowane po cechach jakoœciowych.
-<<>>==
-# zaleznosc pomiedzy gatunkiem a cechami numerycznymi
-penguins_data %>% group_by(species) %>% summarise(across(-c(island, sex, year), mean))
-@
+\begin{Schunk}
+\begin{Sinput}
+> # zaleznosc pomiedzy gatunkiem a cechami numerycznymi
+> penguins_data %>% group_by(species) %>% summarise(across(-c(island, sex, year), mean))
+\end{Sinput}
+\begin{Soutput}
+# A tibble: 3 x 5
+  species   bill_length_mm bill_depth_mm flipper_length_mm body_mass_g
+  <fct>              <dbl>         <dbl>             <dbl>       <dbl>
+1 Adelie              38.8          18.3              190.       3706.
+2 Chinstrap           48.8          18.4              196.       3733.
+3 Gentoo              47.6          15.0              217.       5092.
+\end{Soutput}
+\end{Schunk}
 
 \begin{figure}[H]
 \centering
-<<fig=True, echo=FALSE, height=4>>==
-style <- theme_minimal() +
-  theme(
-    legend.position="none",
-    text=element_text(family='mono', face="bold"),
-    title=element_text(size=12, family='mono', face="bold"),
-    axis.text=element_text(size=10, family='mono', face="bold"),
-    axis.title.x=element_blank(),
-  )
-
-gb1 <- ggplot(penguins_data, aes(x = species, y = bill_length_mm)) + 
-  geom_bar(stat = "summary", fun = "mean", fill="#22577A", color="#e9ecef", alpha=0.8) + style
-gb2 <- ggplot(penguins_data, aes(x = species, y = bill_depth_mm)) + 
-  geom_bar(stat = "summary", fun = "mean", fill="#38A3A5", color="#e9ecef", alpha=0.8) + style
-gb3 <- ggplot(penguins_data, aes(x = species, y = flipper_length_mm)) + 
-  geom_bar(stat = "summary", fun = "mean", fill="#57CC99", color="#e9ecef", alpha=0.8) + style
-gb4 <- ggplot(penguins_data, aes(x = species, y = body_mass_g)) + 
-  geom_bar(stat = "summary", fun = "mean", fill="#69b3a2", color="#e9ecef", alpha=0.8) + style
-
-ggarrange(gb1, gb2, gb3, gb4,
-          ncol=2, nrow=2, font.label=list(size = 12, family='mono'))
-@
+\includegraphics{Szablon-016}
 \end{figure}
 
 Jak widaæ na podstawie œrednich, cechy numeryczne pingwinów z gatunków \textit{Adelie} oraz \textit{Chinstrap} nie ró¿ni¹ siê bardzo z wyj¹tkiem d³ugoœci dzioba (œrednio nieznacznie d³u¿sze u \textit{Chinstrap}). Pingwiny gatunku \textit{Gentoo} wyró¿niaj¹ siê natomiast œrednio krótszymi g³êbokoœciami dzioba, ale wiêkszymi masami cia³a. 
 
-<<>>==
-# zaleznosc pomiedzy wyspa wystepowania a cechami numerycznymi
-penguins_data %>% group_by(island) %>% summarise(across(-c(species, sex, year), mean))
-@
+\begin{Schunk}
+\begin{Sinput}
+> # zaleznosc pomiedzy wyspa wystepowania a cechami numerycznymi
+> penguins_data %>% group_by(island) %>% summarise(across(-c(species, sex, year), mean))
+\end{Sinput}
+\begin{Soutput}
+# A tibble: 3 x 5
+  island    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g
+  <fct>              <dbl>         <dbl>             <dbl>       <dbl>
+1 Biscoe              45.2          15.9              210.       4719.
+2 Dream               44.2          18.3              193.       3719.
+3 Torgersen           39.0          18.5              192.       3709.
+\end{Soutput}
+\end{Schunk}
 Nale¿y pamiêtaæ, ¿e gatunek jest mocno skorelowany z wysp¹ wystêpowania, wiêc grupowanie danych po wyspach nie wprowadza wiele nowych danych.
 
-<<>>==
-# zaleznosc pomiedzy plcia a cechami numerycznymi
-penguins_data %>% group_by(species, sex) %>% summarise(across(-c(island, year), mean))
-@
+\begin{Schunk}
+\begin{Sinput}
+> # zaleznosc pomiedzy plcia a cechami numerycznymi
+> penguins_data %>% group_by(species, sex) %>% summarise(across(-c(island, year), mean))
+\end{Sinput}
+\begin{Soutput}
+# A tibble: 6 x 6
+# Groups:   species [3]
+  species   sex    bill_length_mm bill_depth_mm flipper_length_mm body_mass_g
+  <fct>     <fct>           <dbl>         <dbl>             <dbl>       <dbl>
+1 Adelie    female           37.3          17.6              188.       3369.
+2 Adelie    male             40.4          19.1              192.       4043.
+3 Chinstrap female           46.6          17.6              192.       3527.
+4 Chinstrap male             51.1          19.3              200.       3939.
+5 Gentoo    female           45.6          14.2              213.       4680.
+6 Gentoo    male             49.5          15.7              222.       5485.
+\end{Soutput}
+\end{Schunk}
 Samce pingwinów, niezale¿nie od gatunku, przewa¿aj¹ pod wzglêdem ka¿dej cechy, szczególnie masy cia³a.
 
 Teraz pora na zbadanie zale¿noœci pomiêdzy cechami numerycznymi. Równie¿ mo¿na by to rozbiæ, rozbijaj¹c dane na grupy wzglêdem cech jakoœciowych, ale tutaj, dla uproszczenia, u¿yte zostan¹ dane z ca³ej próby. Najpierw obliczona zostanie macierz korelacji dla cech numerycznych:
-<<>>==
-corr <- round(cor(penguins_data[c(3:6)]), 2)
-@
+\begin{Schunk}
+\begin{Sinput}
+> corr <- round(cor(penguins_data[c(3:6)]), 2)
+\end{Sinput}
+\end{Schunk}
 \begin{figure}[H]
 \centering
-<<fig=True, echo=FALSE, height=4>>==
-ggcorrplot(corr, 
-           ggtheme=ggplot2::theme_minimal,
-           colors=c("#22577A", "white", "#38A3A5"),
-           lab=TRUE) +
-  theme(
-    text=element_text(family='mono', face="bold"),
-    title=element_text(size=12, family='mono', face="bold"),
-    axis.text=element_text(size=10, family='mono', face="bold")
-  )
-@
+\includegraphics{Szablon-020}
 \end{figure}
 
 Mo¿na zaobserwowaæ m.in. wysoki wspó³czynnik korelacji pomiêdzy mas¹ cia³a pingwina, a d³ugoœci¹ p³etwy (skrzyd³a). £atwo to zaobserwowaæ na poni¿szym wykresie:
 \begin{figure}[H]
 \centering
-<<fig=True, echo=FALSE, height=4>>==
-ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
-  geom_point(aes(color = species,
-                 shape = species),
-             size = 2) +
-  scale_color_manual(values = c("#22577A","#38A3A5","#57CC99", "#80ED99")) +
-  theme_minimal() +
-  theme(
-    text=element_text(family='mono', face="bold"),
-    title=element_text(size=12, family='mono', face="bold"),
-    axis.text=element_text(size=10, family='mono', face="bold"),
-  )
-@
+\includegraphics{Szablon-021}
 \end{figure}
 
 Natomiast np. d³ugoœæ i g³êbokoœæ dzioba wykazuj¹ ni¿szy poziom korelacji:
 \begin{figure}[H]
 \centering
-<<fig=True, echo=FALSE, height=4>>==
-ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
-  geom_point(aes(color = species,
-                 shape = species),
-             size = 2) +
-  scale_color_manual(values = c("#22577A","#38A3A5","#57CC99", "#80ED99")) +
-  theme_minimal() +
-  theme(
-    text=element_text(family='mono', face="bold"),
-    title=element_text(size=12, family='mono', face="bold"),
-    axis.text=element_text(size=10, family='mono', face="bold"),
-  )
-@
+\includegraphics{Szablon-022}
 \end{figure}
 
 
