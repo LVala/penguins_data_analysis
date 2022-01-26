@@ -23,7 +23,7 @@
 \SweaveOpts{concordance=TRUE}
 \maketitle
 
-<<packages, echo=FALSE>>==
+<<echo=FALSE>>==
 library(psych)
 library(ggplot2)
 library(magrittr)
@@ -31,6 +31,7 @@ library(dplyr)
 library(ggpubr)
 library(reshape2)
 library(ggcorrplot)
+library(stats)
 @
 
 \textit{Ja, ni¿ej podpisany w³asnorêcznym podpisem deklarujê, ¿e przygotowa³em przedstawiony do oceny projekt samodzielnie i ¿adna jego czêœæ nie jest kopi¹ pracy innej osoby.}
@@ -52,29 +53,40 @@ W sk³ad projektu wchodz¹ dwa zestawy danych: \textit{penguins\_raw} oraz jego up
   \item \textbf{island} - wyspa w archipelagu Palmera (zmienna jakoœciowa spoœród \textit{Biscoe}, \textit{Dream}, \textit{Torgersen}),
   \item \textbf{bill\_length\_mm} - d³ugoœæ dzioba (liczba zmiennoprzecinkowa, w milimetrach),
   \item \textbf{bill\_depth\_mm} - g³êbokoœæ dzioba (liczba zmiennoprzecinkowa, w milimetrach),
-  \item \textbf{flipper\_length\_mm} - d³ugoœæ p³etwy (liczba ca³kowita, w milimetrach),
+  \item \textbf{flipper\_length\_mm} - d³ugoœæ p³etwy/skrzyd³a (liczba ca³kowita, w milimetrach),
   \item \textbf{body\_mass\_g} - masa cia³a (liczba ca³kowita, w gramach),
   \item \textbf{sex} - p³eæ (zmienna jakoœciowa spoœród \textit{male}, \textit{female}),
   \item \textbf{year} - rok obserwacji (liczba ca³kowita, z zamiarem zmiany na zmienn¹ jakoœciow¹)
 \end{itemize}
 
 Do za³adowania ich do œrodowiska R mo¿na podejœæ na dwa sposoby. Z racji tego, ¿e jest to zestaw danych przygotowanych z myœl¹ o edukacji, zosta³ spakowany do pakietu R, który mo¿na zainstalowaæ poprzez CRAN, a nastêpnie za³adowaæ:
+
 <<results=hide>>==
-install.packages("palmerpenguins", repos = "https://cloud.r-project.org/")
+install.packages("palmerpenguins", 
+                 repos = "https://cloud.r-project.org/")
 library(palmerpenguins)
 data(package = 'palmerpenguins')
 penguins_data <- penguins
 @
+
 Alternatywnym podejœciem bêdzie pobranie pliku \textit{.csv} z \href{https://github.com/allisonhorst/palmerpenguins/tree/master/inst/extdata}{\texttt{repozytorium projektu}} i za³adowanie go:
+
 <<>>==
-penguins_data <- read.csv(file = "penguins.csv", header = TRUE, stringsAsFactors = TRUE)
+penguins_data <- read.csv(file = "penguins.csv", 
+                          header = TRUE, 
+                          stringsAsFactors = TRUE)
 @
+
 Czyszczenie danych sprowadzi siê tylko do usuniêcia rekordów z wartoœciami nieznanymi, które s¹ numeryczne (s¹ tylko dwa takie wiersze i nie zawieraj¹ one ¿adnego z pomiarów, wiêc nie poskutkuje to du¿¹ utrat¹ informacji). W przypadku nieznanych zmiennych jakoœciowych (tylko p³ci pingwinów w tym przypadku), jedn¹ z metod by³oby zast¹pienie ich losowymi wartoœciami, jednak ze wzglêdu na potencjalnie du¿¹ korelacjê p³ci z pozosta³ymi cechami, nie jest to najlepsze rozwi¹zanie. Najlepsz¹ metod¹ by³oby zbadanie zale¿noœci cech i p³ci, i na tej podstawie uzupe³nienie danych, jednak, dla uproszczenia oraz ze wzglêdu na niewielk¹ iloœæ takich wierszy, tutaj zostan¹ usuniête. Inn¹ niewielk¹ zmian¹ bêdzie bêdzie konwersja typu roku obserwacji z liczby na zmienn¹ jakoœciow¹, w tym przypadku ma to wiêcej sensu, bo bardziej interesuj¹cymi informacjami s¹ cechy pingwinów w danym roku ni¿ œrednia lat wykonywania pomiarów:
+
 <<>>==
 penguins_data <- na.omit(penguins_data)
 penguins_data$year <- as.factor(penguins_data$year)
 @
+
+\pagebreak
 Wówczas dane wygl¹daæ bêd¹ nastêpuj¹co:
+
 <<>>==
 str(penguins_data)
 @
@@ -82,9 +94,14 @@ str(penguins_data)
 
 \section{Analiza danych}
 \subsection{Wydobywanie podstawowych informacji z danych}
-Na pocz¹tku zostan¹ obliczone estymatory punktowe podstawowych wielkoœci statystyki opisowej:
+Na pocz¹tku zostan¹ obliczone wartoœci estymatorów punktowych podstawowych wielkoœci statystyki opisowej:
+
 <<>>==
 summary(penguins_data)
+@
+
+\pagebreak
+<<>>==
 # zmienne jakoœciowe ignorowane
 describeBy(penguins_data[c(3:6)])
 @
@@ -98,7 +115,6 @@ melted <- melt(penguins_data[c(3:6)])
 ggplot(melted, aes(x=variable, y=value, 
                            fill=variable)) +
   geom_boxplot(alpha=0.8) +
-  #geom_jitter(shape=16, position=position_jitter(0.3)) +
   facet_wrap(~variable, scales="free", ncol=4, nrow=1) +
   scale_fill_manual(values = c("#22577A","#38A3A5","#57CC99", "#80ED99"), 
                     guide = "none") +
@@ -114,7 +130,7 @@ ggplot(melted, aes(x=variable, y=value,
 @
 \end{figure}
 
-Jak widaæ, dla wszystkich cech, z wyj¹tkiem \textit{bill\_depth\_mm}, \textit{skew}, czyli wspó³czynnik skoœnoœci przyjmuje wartoœci dodatnie, oznacza to, ¿e rozk³ady s¹ (w niewielkim stopniu, bo wartoœci \textit{skew} nadal bliskie zera) prawostronnie asymetryczne (maj¹ wyd³u¿one prawe ramiê rozk³adu). Rozk³ad \textit{bill\_depth\_mm} jest w podobnym stopniu lewostronnie asymetryczny. Na podstawie wartoœci kurtozy, która dla ka¿dej cechy jest ujemna, mo¿na stwierdziæ, ¿e intensywnoœæ wartoœci skrajnych jest mniejsza ni¿ w przypadku rozk³adu normalnego. Dobrze obrazuj¹ to poni¿sze wykresy gêstoœci prawdopodobieñstwa:
+Jak widaæ, dla wszystkich cech, z wyj¹tkiem \textit{bill\_depth\_mm}, \textit{skew}, czyli wspó³czynnik skoœnoœci przyjmuje wartoœci dodatnie, oznacza to, ¿e rozk³ady s¹ (w niewielkim stopniu, bo wartoœci \textit{skew} s¹ nadal bliskie zera) prawostronnie asymetryczne (maj¹ wyd³u¿one prawe ramiê rozk³adu). Rozk³ad \textit{bill\_depth\_mm} jest w podobnym stopniu lewostronnie asymetryczny. Na podstawie wartoœci kurtozy, która dla ka¿dej cechy jest ujemna, mo¿na stwierdziæ, ¿e intensywnoœæ wartoœci skrajnych jest mniejsza ni¿ w przypadku rozk³adu normalnego. Dobrze obrazuj¹ to poni¿sze wykresy, tzw. \textit{density plots}:
 
 \begin{figure}[H]
 \centering
@@ -138,19 +154,19 @@ ggarrange(fg1, fg2, fg3, fg4,
 @
 \end{figure}
 
-Badanie, czy dane pochodz¹ z jakiegoœ rozk³adu, zostanie przeprowadzone w dalszej czêœci dokumentu, ale ju¿ teraz, na podstawie wykresów gêstoœci i ich podobieñstwa do wykresu gêstoœci rozk³adu normalnego, mo¿na snuæ pewne przypuszczenia na ten temat.
+Badanie, czy dane pochodz¹ z jakiegoœ rozk³adu, zostanie przeprowadzone w dalszej czêœci dokumentu, ale ju¿ teraz, na podstawie wykresów i ich podobieñstwa do wykresu gêstoœci rozk³adu normalnego, mo¿na snuæ pewne przypuszczenia na ten temat.
 
 \subsection{Badanie zale¿noœci pomiêdzy danymi}
-Na pocz¹tku pod lupê zostan¹ wziête zmienne jakoœciowe i zale¿noœci pomiêdzy nimi.
+Na pocz¹tku pod lupê zostanie wziêtych kilka zmiennych jakoœciowych i zale¿noœci pomiêdzy nimi.
+
 <<>>==
-# gatunek, a wyspa, na której zostal zaobserwowany
+# gatunek, a wyspa na ktorej zostal zaobserwowany
 penguins_data %>% count(species, island)
 @
+
 \begin{figure}[H]
 \centering
 <<fig=True, echo=FALSE, height=4>>==
-# ze wzglêdu na dlugoœæ, przy kolejnych wykresach
-# kod je generuj¹cy zostanie ukryty
 ggplot(penguins_data, aes(x = island, fill = species)) +
   geom_bar(alpha = 0.8) +
   scale_fill_manual(values = c("#22577A","#38A3A5","#57CC99"),
@@ -164,10 +180,12 @@ ggplot(penguins_data, aes(x = island, fill = species)) +
         axis.title=element_text(size=18, family='mono', face="bold"))
 @
 \end{figure}
+
 <<>>==
-# gatunek, a pleæ
+# gatunek, a plec
 penguins_data %>% count(sex, species)
 @
+
 \begin{figure}[H]
 \centering
 <<fig=True, echo=FALSE, height=4>>==
@@ -184,33 +202,15 @@ ggplot(penguins_data, aes(x = sex, fill = species)) +
         axis.title=element_text(size=18, family='mono', face="bold"))
 @
 \end{figure}
-<<>>==
-# wyspa, na której dokonano pomiaru, a pleæ
-penguins_data %>% count(sex, island)
-@
-\begin{figure}[H]
-\centering
-<<fig=True, echo=FALSE, height=4>>==
-ggplot(penguins_data, aes(x = sex, fill = island)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("#22577A","#38A3A5","#57CC99"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~island, ncol = 1) +
-  coord_flip() +
-  theme(text=element_text(family='mono', face="bold"),
-        title=element_text(family='mono', face="bold"),
-        axis.text=element_text(size=15, family='mono', face="bold"), 
-        axis.title=element_text(size=18, family='mono', face="bold"))
-@
-\end{figure}
 
-Ciekaw¹ cech¹, któr¹ mo¿na tutaj zauwa¿yæ, jest to, ¿e tylko gatunek \textit{Adelie} ¿yje wszystkie na wszystkich trzech wyspach, reszta gatunków zamieszkuje jedn¹ wyspê. Rozk³ad p³ci wzglêdem gatunku oraz wyspy wystêpowanie jest praktycznie równomierny, trudno zaobserwowaæ inne zale¿noœci pomiêdzy cechami jakoœciowymi.
+Ciekaw¹ cech¹, któr¹ mo¿na tutaj zauwa¿yæ, jest to, ¿e tylko gatunek \textit{Adelie} ¿yje na wszystkich trzech wyspach, reszta gatunków zamieszkuje jedn¹ wyspê. Rozk³ad p³ci wzglêdem gatunku jest praktycznie równomierny, trudno zaobserwowaæ inne zale¿noœci pomiêdzy cechami jakoœciowymi.
 
-Teraz zale¿noœci pomiêdzy cechami numerycznymi i jakoœciowymi. Dla uproszczenia pod uwagê wziête zostan¹ tylko œrednie wartoœci grupowane po cechach jakoœciowych.
+Teraz zale¿noœci pomiêdzy cechami numerycznymi i jakoœciowymi. Dla uproszczenia pod uwagê wziête zostan¹ tylko wartoœci œrednie grupowane po cechach jakoœciowych.
+
 <<>>==
 # zaleznosc pomiedzy gatunkiem a cechami numerycznymi
-penguins_data %>% group_by(species) %>% summarise(across(-c(island, sex, year), mean))
+penguins_data %>% group_by(species) %>% 
+  summarise(across(-c(island, sex, year), mean))
 @
 
 \begin{figure}[H]
@@ -239,24 +239,23 @@ ggarrange(gb1, gb2, gb3, gb4,
 @
 \end{figure}
 
-Jak widaæ na podstawie œrednich, cechy numeryczne pingwinów z gatunków \textit{Adelie} oraz \textit{Chinstrap} nie ró¿ni¹ siê bardzo z wyj¹tkiem d³ugoœci dzioba (œrednio nieznacznie d³u¿sze u \textit{Chinstrap}). Pingwiny gatunku \textit{Gentoo} wyró¿niaj¹ siê natomiast œrednio krótszymi g³êbokoœciami dzioba, ale wiêkszymi masami cia³a. 
+Jak widaæ na podstawie œrednich, cechy numeryczne pingwinów z gatunków \textit{Adelie} oraz \textit{Chinstrap} nie ró¿ni¹ siê bardzo z wyj¹tkiem d³ugoœci dzioba (œrednio nieznacznie d³u¿sze u \textit{Chinstrap}). Pingwiny gatunku \textit{Gentoo} wyró¿niaj¹ siê natomiast œrednio krótszymi g³êbokoœciami dzioba, ale wiêkszymi masami cia³a.
 
-<<>>==
-# zaleznosc pomiedzy wyspa wystepowania a cechami numerycznymi
-penguins_data %>% group_by(island) %>% summarise(across(-c(species, sex, year), mean))
-@
-Nale¿y pamiêtaæ, ¿e gatunek jest mocno skorelowany z wysp¹ wystêpowania, wiêc grupowanie danych po wyspach nie wprowadza wiele nowych danych.
-
+\pagebreak
 <<>>==
 # zaleznosc pomiedzy plcia a cechami numerycznymi
-penguins_data %>% group_by(species, sex) %>% summarise(across(-c(island, year), mean))
+penguins_data %>% group_by(species, sex) %>% 
+  summarise(across(-c(island, year), mean))
 @
+
 Samce pingwinów, niezale¿nie od gatunku, przewa¿aj¹ pod wzglêdem ka¿dej cechy, szczególnie masy cia³a.
 
-Teraz pora na zbadanie zale¿noœci pomiêdzy cechami numerycznymi. Równie¿ mo¿na by to rozbiæ, rozbijaj¹c dane na grupy wzglêdem cech jakoœciowych, ale tutaj, dla uproszczenia, u¿yte zostan¹ dane z ca³ej próby. Najpierw obliczona zostanie macierz korelacji dla cech numerycznych:
+Teraz pora na zbadanie zale¿noœci pomiêdzy cechami numerycznymi. Równie¿ mo¿na by to podzieliæ, rozbijaj¹c dane na grupy wzglêdem cech jakoœciowych, ale tutaj, dla uproszczenia, u¿yte zostan¹ dane z ca³ej próby. Najpierw obliczona zostanie macierz korelacji dla cech numerycznych:
+
 <<>>==
 corr <- round(cor(penguins_data[c(3:6)]), 2)
 @
+
 \begin{figure}[H]
 \centering
 <<fig=True, echo=FALSE, height=4>>==
@@ -273,10 +272,11 @@ ggcorrplot(corr,
 \end{figure}
 
 Mo¿na zaobserwowaæ m.in. wysoki wspó³czynnik korelacji pomiêdzy mas¹ cia³a pingwina, a d³ugoœci¹ p³etwy (skrzyd³a). £atwo to zaobserwowaæ na poni¿szym wykresie:
+
 \begin{figure}[H]
 \centering
 <<fig=True, echo=FALSE, height=4>>==
-ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
+ggplot(penguins_data, aes(x = flipper_length_mm, y = body_mass_g)) +
   geom_point(aes(color = species,
                  shape = species),
              size = 2) +
@@ -290,11 +290,12 @@ ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
 @
 \end{figure}
 
-Natomiast np. d³ugoœæ i g³êbokoœæ dzioba wykazuj¹ ni¿szy poziom korelacji:
+D³ugoœæ i g³êbokoœæ dzioba wykazuj¹ nieznacznie ujemny poziom korelacji dla ca³ej próby danych, natomiast dla poszczególnych gatunków s¹ to cechy nadal silnie skorelowane, co wynika z poni¿szego wykresu (tzw. \textit{paradoks Simpsona}):
+
 \begin{figure}[H]
 \centering
 <<fig=True, echo=FALSE, height=4>>==
-ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
+ggplot(penguins_data, aes(x = bill_length_mm, y = bill_depth_mm)) +
   geom_point(aes(color = species,
                  shape = species),
              size = 2) +
@@ -308,32 +309,104 @@ ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
 @
 \end{figure}
 
+\subsection{Analiza rozk³adu badanych cech}
+Teraz nast¹pi test tego, na ile rozk³ad jednej z cech numerycznych odpowiada rozk³adowi normalnemu. Dla uproszczenia zostanie on przeprowadzony tylko dla jednej cechy. Bazuj¹c na wykresach z sekcji \textbf{3.1}, wybrana zosta³a cecha \textit{body\_mass\_g}. 
 
+\begin{figure}[H]
+\centering
+<<fig=True, echo=FALSE, height=4>>==
+ggplot(penguins_data, aes(x=body_mass_g)) + 
+  geom_histogram(color = "#38A3A5", fill = "#38A3A5", alpha = 0.8)+
+  theme_minimal() + 
+  theme(
+    text=element_text(family='mono', face="bold"),
+    title=element_text(size=12, family='mono', face="bold"),
+    axis.text=element_text(size=10, family='mono', face="bold"),
+  )
+@
+\end{figure}
+
+Histogram raczej przeczy temu, ¿e rozk³ad ten jest normalny. Dla pewnoœci u¿yty zostanie \textit{Q-Q plot} (\textit{quantile-quantile plot}, inna wizualna metoda testowania, czy rozk³ad jest normalny):
+
+\begin{figure}[H]
+\centering
+<<fig=True, echo=FALSE, height=4>>==
+ggplot(penguins_data, aes(sample = body_mass_g)) +
+  stat_qq(color = "#22577A") +
+  stat_qq_line(color = "#38A3A5") +
+  theme_minimal() +
+  theme(
+    legend.position="none",
+    text=element_text(family='mono', face="bold"),
+    title=element_text(size=12, family='mono', face="bold"),
+    axis.title=element_blank(),
+  )
+@
+\end{figure}
+
+W przypadku rozk³adu normalnego punkty wykresu tworzy³yby prost¹, Tutaj natomiast mo¿na zaobserwowaæ stosunkowo du¿e odchylenie od prostej, co równie¿ sugeruje, ¿e rozk³ad nie jest normalny.
+
+Ostatnim krokiem bêdzie przeprowadzenie testu Shapiro-Wilk'a, czyli testu sprawdzaj¹cego, czy zbiór danych jest dobrze modelowany przez rozk³ad normalny. Hipotez¹ zerow¹ w tym teœcie jest $H_0$: rozk³ad jest normalny, natomiast hipotez¹ alternatywn¹ $H_1$: rozk³ad nie jest normalny. Nale¿y wspomnieæ, ¿e test zosta³ stworzon¹ z myœl¹ o liczebnoœci próbki poni¿ej 50 obserwacji.
+
+<<>>==
+shapiro.test(sample(penguins_data$body_mass_g, 50))
+@
+
+Interpretacja testu sprowadza siê do porównania wartoœci $p$ z przyjêtym poziomem istotnoœci $\alpha$. Tutaj za poziom istotnoœci przyjêta zostanie wartoœæ $\alpha = 0.05$. Z uwagi na wykorzystanie tylko losowych 50 wartoœci z ca³ego zbioru danych, wyniki mog¹ siê ró¿niæ w zale¿noœci od wywo³ania, jednak w wiêkszoœci przypadków przyjmuj¹ wartoœci $< 0.05$, co pozwala na odrzucenie hipotezy zerowej.
+
+Ostatecznie, na podstawie powy¿szych trzech metod, mo¿na stwierdziæ, ¿e rozk³ad cechy \textit{body\_mass\_g} nie jest normalny.
 
 \subsection{Estymatory przedzia³owe}
+W tej sekcji zostan¹ wyznaczone niektóre wartoœci estymatorów przedzia³owych. Dla uproszczenia, badan¹ cech¹ bêdzie tylko \textit{body\_mass\_g}. Cecha ta nie nale¿y do rozk³adu normalnego, co zosta³o ustalone w poprzedniej sekcji, wiêc badanym przedzia³em ufnoœci bêdzie tylko przedzia³ dla œredniej. Wartoœæ wariancji czy odchylenia standardowego nie s¹ znane. W zwi¹zku z tymi ograniczeniami u¿yta zostanie statystyka
 
+$$T=\frac{\overline{X}-m}{\frac{S}{\sqrt{n}}}$$
 
-\subsection{Testowanie hipotez}
-TestowaÄ‡ bÄ™dziemy hipotezÄ™ zerowÄ… {\bf{H0}}: ... wobec hipotezy alternatywnej {\bf{H1}}: ...
-Korzystam ze statystyki $t$-Studenta postaci
-\begin{align*}
-t=\sum_{i=1}^n\frac{licznik X_i}{mianownik^2}
-\end{align*}
+Wiadomo, ¿e je¿eli $X$ ma rozk³ad normalny to
 
-\subsection{Regresja}
+$$T\sim t_{n-1}$$
 
-W ten sposÃ³b moÅ¼na zapisaÄ‡ rÃ³wnania w \LaTeX, znakiem AND wyrÃ³wnujemy je, a dwa slashe sÅ‚uÅ¼Ä… do przejÅ›cia do kolejnej linii.
-\begin{align*}
-y&=a\cdot x+b+\varepsilon,\\
-z&=3\cdot y.
-\end{align*}
+gdzie $t_n$ jest rozk³adem $t$ o $n$ stopniach swobody, zwanym te¿ \textbf{rozk³adem Studenta}. W tym przypadku, kiedy rozk³ad $X$ nie jest normalny, statystyka $T$ ma (dla $n >$ ok. $20$) rozk³ad zbli¿ony do rozk³adu Studenta. Za poziom ufnoœci zostanie przyjêta wartoœæ $\alpha = 1-0.95$, wówczas, dla najkrótszego przedzia³u ufnoœci
+
+$$P(t_{\frac{\alpha}{2},n-1} \leq T \leq t_{1-\frac{\alpha}{2}, n-1}) = 1- \alpha$$
+
+Czyli przedzia³ ufnoœci dla œredniej to
+
+$$\Big[\overline{X}-t_{\frac{\alpha}{2},n-1}\frac{S}{\sqrt{n}},\overline{X}+t_{1-\frac{\alpha}{2},n-1}\frac{S}{\sqrt{n}}\Big]$$
+
+\newpage
+Funkcja w R obliczaj¹ce krañce tego przedzia³u:
+<<>>==
+meanCI <- function(x, conf.level) {
+  alpha <- 1 - conf.level
+  n <- length(x)
+  return (c(mean(x) - qt(1-alpha/2, n-1)*sd(x)/ sqrt(n),
+            mean(x) + qt(1-alpha/2, n-1)*sd(x)/ sqrt(n))
+  )
+}
+@
+<<>>==
+meanCI(penguins_data$body_mass_g, 0.95)
+@
+
+Natomiast funkcja z pakietu \textit{stats} zwraca nastêpuj¹cy wynik:
+
+<<>>==
+t.test(penguins_data$body_mass_g)$"conf.int"
+@
+tak wiêc przyjêta metoda jest poprawna. St¹d przedzia³ ufnoœci œredniej dla rozk³adu cechy \textit{body\_mass\_g} wynosi $[4120.256, 4293.858]$.
+
 
 \section{Wnioski}
-Wnioski pÅ‚ynÄ…ce z przeprowadzonej analizy, sÄ… nastÄ™pujÄ…ce:
+Analiza statystyczna zestawu danych u¿ytych w projekcie dostarcza wielu potencjalnie wartoœciowych informacji dla ornitologii i zoologii:
 \begin{itemize}
-\item wniosek pierwszy,
-\item wniosek drugi,
-\item i kolejne.
+\item pozwala przewidywaæ podstawowe cechy pingwinów,
+\item traktuje o zale¿noœciach pomiêdzy cechami tych ptaków,
+\item umo¿liwia powi¹zanie miejsc wystêpowania z zamieszkuj¹cymi je gatunkami,
+\item pokazuje zmiany zachodz¹ce w cechach pingwinów na przestrzeni lat.
 \end{itemize}
+
+Oczywiœcie ów projekt jest jedynie przyk³adem zastosowania statystycznej analizy danych, wymienione zalety jej wykorzystania mo¿na uogólniæ, statystyka daje ogromne mo¿liwoœci w badaniu danych i odkrywaniu ciekawych i u¿ytecznych zale¿noœci.
+
+Równie¿ nale¿a³oby wspomnieæ o u¿ytych technologiach: jêzyk \textbf{R} i jego biblioteki zawieraj¹ce wiele przydatnych narzêdzi do analizy statystycznej, \textbf{ggplot} pozwalaj¹cy na stworzenia atrakcyjnych wizualnie wykresów oraz \textbf{Sweave} - narzêdzie umo¿liwiaj¹ce u¿ywania kodu R wewn¹trz \LaTeX. U¿ycie tych technologii u³atwi³o i uprzyjemni³o proces tworzenia owego projektu.
 
 \end{document}
