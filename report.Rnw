@@ -407,6 +407,6 @@ Analiza statystyczna zestawu danych u¿ytych w projekcie dostarcza wielu potencja
 
 Oczywiœcie ów projekt jest jedynie przyk³adem zastosowania statystycznej analizy danych, wymienione zalety jej wykorzystania mo¿na uogólniæ, statystyka daje ogromne mo¿liwoœci w badaniu danych i odkrywaniu ciekawych i u¿ytecznych zale¿noœci.
 
-Równie¿ nale¿a³oby wspomnieæ o u¿ytych technologiach: jêzyk \textbf{R} i jego biblioteki zawieraj¹ce wiele przydatnych narzêdzi do analizy statystycznej, \textbf{ggplot} pozwalaj¹cy na stworzenia atrakcyjnych wizualnie wykresów oraz \textbf{Sweave} - narzêdzie umo¿liwiaj¹ce u¿ywania kodu R wewn¹trz \LaTeX. U¿ycie tych technologii u³atwi³o i uprzyjemni³o proces tworzenia owego projektu.
+Równie¿ nale¿a³oby wspomnieæ o u¿ytych technologiach: jêzyk \textbf{R} i jego biblioteki zawieraj¹ce wiele przydatnych narzêdzi do analizy statystycznej, \textbf{ggplot2} pozwalaj¹cy na stworzenia atrakcyjnych wizualnie wykresów oraz \textbf{Sweave} - narzêdzie umo¿liwiaj¹ce u¿ywania kodu R wewn¹trz \LaTeX. U¿ycie tych technologii u³atwi³o i uprzyjemni³o proces tworzenia owego projektu.
 
 \end{document}
