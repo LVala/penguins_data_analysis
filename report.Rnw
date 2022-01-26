@@ -310,7 +310,7 @@ ggplot(penguins_data, aes(x = bill_length_mm, y = bill_depth_mm)) +
 \end{figure}
 
 \subsection{Analiza rozk³adu badanych cech}
-Teraz nast¹pi test tego, na ile rozk³ad jednej z cech numerycznych odpowiada rozk³adowi normalnemu. Dla uproszczenia zostanie on przeprowadzony tylko dla jednej cechy. Bazuj¹c na wykresach z sekcji \textbf{3.1}, wybrana zosta³a cecha \textit{body\_mass\_g}. 
+Teraz nast¹pi test tego, na ile rozk³ad cech numerycznych odpowiada rozk³adowi normalnemu. Dla uproszczenia zostanie on przeprowadzony tylko dla jednej cechy. Bazuj¹c na wykresach z sekcji \textbf{3.1}, wybrana zosta³a cecha \textit{body\_mass\_g}. 
 
 \begin{figure}[H]
 \centering
@@ -357,7 +357,7 @@ Interpretacja testu sprowadza siê do porównania wartoœci $p$ z przyjêtym poziome
 Ostatecznie, na podstawie powy¿szych trzech metod, mo¿na stwierdziæ, ¿e rozk³ad cechy \textit{body\_mass\_g} nie jest normalny.
 
 \subsection{Estymatory przedzia³owe}
-W tej sekcji zostan¹ wyznaczone niektóre wartoœci estymatorów przedzia³owych. Dla uproszczenia, badan¹ cech¹ bêdzie tylko \textit{body\_mass\_g}. Cecha ta nie nale¿y do rozk³adu normalnego, co zosta³o ustalone w poprzedniej sekcji, wiêc badanym przedzia³em ufnoœci bêdzie tylko przedzia³ dla œredniej. Wartoœæ wariancji czy odchylenia standardowego nie s¹ znane. W zwi¹zku z tymi ograniczeniami u¿yta zostanie statystyka
+W tej sekcji zostan¹ wyznaczone niektóre wartoœci estymatorów przedzia³owych. Dla uproszczenia, badan¹ cech¹ bêdzie tylko \textit{body\_mass\_g}. Cecha ta nie posiada rozk³adu normalnego, co zosta³o ustalone w poprzedniej sekcji, wiêc badanym przedzia³em ufnoœci bêdzie tylko przedzia³ dla œredniej. Wartoœæ wariancji czy odchylenia standardowego nie s¹ znane. W zwi¹zku z tymi ograniczeniami u¿yta zostanie statystyka
 
 $$T=\frac{\overline{X}-m}{\frac{S}{\sqrt{n}}}$$
 
@@ -371,7 +371,7 @@ $$P(t_{\frac{\alpha}{2},n-1} \leq T \leq t_{1-\frac{\alpha}{2}, n-1}) = 1- \alph
 
 Czyli przedzia³ ufnoœci dla œredniej to
 
-$$\Big[\overline{X}-t_{\frac{\alpha}{2},n-1}\frac{S}{\sqrt{n}},\overline{X}+t_{1-\frac{\alpha}{2},n-1}\frac{S}{\sqrt{n}}\Big]$$
+$$\Big[\overline{X}-t_{1-\frac{\alpha}{2},n-1}\frac{S}{\sqrt{n}},\overline{X}+t_{1-\frac{\alpha}{2},n-1}\frac{S}{\sqrt{n}}\Big]$$
 
 \newpage
 Funkcja w R obliczaj¹ce krañce tego przedzia³u:
