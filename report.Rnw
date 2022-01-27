@@ -365,7 +365,7 @@ Wiadomo, ¿e je¿eli $X$ ma rozk³ad normalny to
 
 $$T\sim t_{n-1}$$
 
-gdzie $t_n$ jest rozk³adem $t$ o $n$ stopniach swobody, zwanym te¿ \textbf{rozk³adem Studenta}. W tym przypadku, kiedy rozk³ad $X$ nie jest normalny, statystyka $T$ ma (dla $n >$ ok. $20$) rozk³ad zbli¿ony do rozk³adu Studenta. Za poziom ufnoœci zostanie przyjêta wartoœæ $\alpha = 1-0.95$, wówczas, dla najkrótszego przedzia³u ufnoœci
+gdzie $t_n$ jest rozk³adem $t$ o $n$ stopniach swobody, zwanym te¿ \textbf{rozk³adem Studenta}. W tym przypadku, kiedy rozk³ad $X$ nie jest normalny, statystyka $T$ ma (dla $n >$ ok. $20$) rozk³ad zbli¿ony do rozk³adu Studenta. Za poziom ufnoœci zostanie przyjêta wartoœæ 0.95, wówczas $\alpha = 1-0.95$, dla najkrótszego przedzia³u ufnoœci
 
 $$P(t_{\frac{\alpha}{2},n-1} \leq T \leq t_{1-\frac{\alpha}{2}, n-1}) = 1- \alpha$$
 
