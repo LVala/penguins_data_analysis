@@ -1,11 +1,11 @@
-# Statystyczna analiza danych - projekt na zajęcia Rachunku Prawdopodobieństwa i Statystyki
-### Łukasz Wala, semestr 2021/22
----
-W tym repozytorium znajduje się [opracowanie problemu](report.pdf) w postaci pliku *.pdf* oraz jego kod źródłowy.
+# Statistical data analysis - project for Theory of Probability and Statistics Course
+### Łukasz Wala, 2021/22 winter semester, Computer Science WIEiT AGH UST
 
-Użyte technologie:
-- język *R* i jego pakiety
+This repository contains [problem description (in Polish)](report.pdf) as a *.pdf* file and its source code.
+
+Used technologies:
+- *R* language and its packages
 - *Sweave*
-- *LaTeX* 
+- *LaTeX*
 
-Dataset użyty w projekcie pochodzi ze strony projektu [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/).
+Dataset used in this analysis comes from [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/) project.
